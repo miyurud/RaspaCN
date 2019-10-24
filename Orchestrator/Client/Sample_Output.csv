@@ -1,0 +1,5 @@
+,Number_of_Workers,Number_of_partial_siddhi_apps,DataRate,No of String Attributes in input Stream,No of float Attributes in input Stream,Throughput
+0,1,9,3,4,7,475.7794542548605
+1,2,9,3,4,7,475.7794542548605
+2,3,9,3,4,7,473.6503754884473
+3,4,9,3,4,7,482.0509499333487
