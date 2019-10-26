@@ -1,9 +1,28 @@
-package org.wso2.carbon.sp.jobmanager.core.allocation;
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
+package org.wso2.carbon.sp.jobmanager.core.allocation;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.log4j.Logger;
+
 import java.lang.Math;
+
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.datasource.core.exception.DataSourceException;
 import org.wso2.carbon.sp.jobmanager.core.appcreator.DistributedSiddhiQuery;
@@ -15,7 +34,6 @@ import org.wso2.carbon.sp.jobmanager.core.internal.ServiceDataHolder;
 import org.wso2.carbon.sp.jobmanager.core.model.ResourceNode;
 import org.wso2.carbon.sp.jobmanager.core.model.ResourcePool;
 import org.wso2.carbon.sp.jobmanager.core.model.SiddhiAppHolder;
-//port org.wso2.siddhi.query.api.SiddhiApp;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -46,8 +64,8 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
             DataSourceService dataSourceService = ServiceDataHolder.getDataSourceService();
             DataSource datasource = (HikariDataSource) dataSourceService.getDataSource(datasourceName);
             Connection connection = datasource.getConnection();
-
             return connection;
+
         } catch (SQLException e) {
             logger.error("SQL error : " + e.getMessage());
         } catch (DataSourceException e) {
@@ -99,7 +117,7 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
         ResultSet resultSet;
         try {
             for (SiddhiAppHolder appHolder : appsToDeploy) {
-                logger.info("Starting partial Siddhi app ......................." + appHolder.getAppName());
+                logger.info("Starting partial Siddhi app : " + appHolder.getAppName());
                 String[] SplitArray = appHolder.getAppName().split("-");
                 int executionGroup = Integer.valueOf(SplitArray[SplitArray.length - 2].substring(5));
                 int parallelInstance = Integer.valueOf(SplitArray[SplitArray.length - 1]);
@@ -107,14 +125,12 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
                 logger.info("Execution Group = " + executionGroup);
                 logger.info("Parallel = " + parallelInstance);
                 logger.info("Metric details of " + appHolder.getAppName() + "\n");
-                logger.info("---------------------------------------------------");
 
                 String query = "SELECT m3 ,m5, m7 ,m16 FROM metricstable where exec=" +
                         executionGroup + " and parallel=" + parallelInstance +
                         " order by iijtimestamp desc limit 1 ";
 
                 resultSet = statement.executeQuery(query);
-                getLayoutChange();
 
                 if (resultSet.isBeforeFirst()) {     //Check the corresponding partial siddhi app is having the metrics
                     logger.info("Matrics details are found for the partial Siddhi App");
@@ -161,23 +177,21 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
                             ", Throughput :" + throughput +
                             " and processCPU : " + processCPU + "\n");
                 }
-                resultSet.close();
+                //resultSet.close();
             }
             if ((metricCounter + 2) > appsToDeploy.size()) {
                 logger.error("Metrics are not available for required number of Partial siddhi apps");
             }
         } catch (SQLException e) {
             logger.error(e);
-
         }
 
 
         try {
             switchingFunction(currentSummeryThroughput, partailSiddhiApps);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
-
         insertPreviousData(partailSiddhiApps);
     }
 
@@ -348,8 +362,8 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
 
                     ArrayList<Double> temp = new ArrayList<Double>();
                     for (int g = 0; g < multipleKnapsack.getKnapsacks().size(); g++) {
-                        temp.add(multipleKnapsack.getKnapsacks().get(g).getcapacity());
-                        logger.info(multipleKnapsack.getKnapsacks().get(g).getcapacity() + " added");
+                        temp.add(multipleKnapsack.getKnapsacks().get(g).getCapacity());
+                        logger.info(multipleKnapsack.getKnapsacks().get(g).getCapacity() + " added");
                     }
                     Collections.sort(temp);
                     int k = 1;
@@ -357,7 +371,7 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
                         double s = temp.get(temp.size() - k);
                         //logger.info("s " +s);
                         for (int h = 0; h < multipleKnapsack.getKnapsacks().size(); h++) {
-                            if (multipleKnapsack.getKnapsacks().get(h).getcapacity() == s) {
+                            if (multipleKnapsack.getKnapsacks().get(h).getCapacity() == s) {
                                 multipleKnapsack.getKnapsacks().get(h).addPartialSiddhiApps(item);
                             }
                         }
@@ -420,41 +434,14 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
             logger.error(e);
         }
 
-        inertia = Math.abs(currentSummeryThroughput - previousSummaryThroughput) / previousSummaryThroughput ;
-        /*if ((previousSummaryThroughput - currentSummeryThroughput) > 5.0) {
-            for (int i = 0; i < partailSiddhiApps.size(); i++) {
-                String[] SplitArray = partailSiddhiApps.get(i).getName().split("-");
-                int executionGroup = Integer.valueOf(SplitArray[SplitArray.length - 2].substring(5));
+        inertia = Math.abs(currentSummeryThroughput - previousSummaryThroughput) / previousSummaryThroughput;
 
-                String query = "SELECT Throughput, Latency, Event_Count, process_CPU FROM previous_scheduling_details where exec = " + executionGroup + "";
-                resultSet = statement.executeQuery(query);
-                logger.info("Query " + query);
-
-                if (resultSet.isBeforeFirst()) {
-                    while (resultSet.next()) {
-                        throughput = resultSet.getDouble("Throughput");
-                        eventCount = resultSet.getInt("Event_Count");
-                        latency = resultSet.getLong("Latency");
-                        processCPU = resultSet.getDouble("process_CPU");
-                    }
-                }
-                newPartialSiddhiApps.add(new PartialSiddhiApp(processCPU,
-                        latency,
-                        throughput,
-                        eventCount,
-                        partailSiddhiApps.get(i).getName()
-                ));
-            }
-            partailSiddhiApps = newPartialSiddhiApps;
-            newPartialSiddhiApps.clear();
-        }*/
-        statement.executeUpdate("TRUNCATE previous_scheduling_details");
         statement.close();
         connection.close();
         return inertia;
     }
 
-    public double getLayoutChange() {
+    public double getLayoutChange(LinkedList<PartialSiddhiApp> partailSiddhiApps) {
         Dictionary<String, String> layout1 = new Hashtable<String, String>();
         Dictionary<String, String> layout2 = new Hashtable<String, String>();
         Statement statement = null;
@@ -471,27 +458,34 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
         }
         ResultSet resultSet1;
         ResultSet resultSet2;
+        logger.info("Partial Siddhi App Size : " + partailSiddhiApps.size());
+        String appsNumber = Integer.toString(partailSiddhiApps.size() * 2);
 
         try {
-            String query1 = "select * from schedulingdetails order by timestamp desc limit 16";
+            String query1 = "select * from schedulingdetails order by timestamp desc limit " + appsNumber;
             resultSet1 = statement.executeQuery(query1);
             logger.info("Query 1: " + query1);
 
             if (resultSet1.isBeforeFirst()) {
                 int round = 0;
+                int count = 0;
                 while (resultSet1.next()) {
+                    count += 1;
                     String partialSiddhiApp1 = resultSet1.getString("partialSiddhiApp");
                     String deployedNode1 = resultSet1.getString("deployedNode");
+                    System.out.println("siddhi app : " + partialSiddhiApp1);
+                    System.out.println("node : " + deployedNode1);
 
-                    if(partialSiddhiApp1.equals("UpdatedMaliciousAttacksDetection-group3-8")){
-                        round +=1;
-                    }
-                    if(round >= 2){
+                    if (count > partailSiddhiApps.size()) {
+                        System.out.println("siddhi app  inside if : " + partialSiddhiApp1);
+                        System.out.println("node inside if : " + deployedNode1);
+
                         layout1.put(partialSiddhiApp1, deployedNode1);
                     }
                 }
             }
-            String query2 = "select * from schedulingdetails order by timestamp desc limit 8";
+            appsNumber = Integer.toString(partailSiddhiApps.size());
+            String query2 = "select * from schedulingdetails order by timestamp desc limit " + appsNumber;
             resultSet2 = statement.executeQuery(query2);
             logger.info("Query 2: " + query2);
 
@@ -500,28 +494,28 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
                     String partialSiddhiApp2 = resultSet2.getString("partialSiddhiApp");
                     String deployedNode2 = resultSet2.getString("deployedNode");
                     layout2.put(partialSiddhiApp2, deployedNode2);
+                    System.out.println("siddhi app : " + partialSiddhiApp2);
+                    System.out.println("node : " + deployedNode2);
                 }
             }
 
-            logger.info(layout1);
-            logger.info(layout2);
+            logger.info("Layout : " + layout1);
+            logger.info("Layout  " + layout2);
 
             Enumeration elements1 = layout1.elements();
             Enumeration elements2 = layout2.elements();
             int count = 0;
             while (elements1.hasMoreElements()) {
-                String Element1 = (String)elements1.nextElement();
-                String Element2 = (String)elements2.nextElement();
+                String Element1 = (String) elements1.nextElement();
+                String Element2 = (String) elements2.nextElement();
 
-                if(Element1.equals(Element2)){
+                if (Element1.equals(Element2)) {
                     logger.info("Resource Node has not changed");
-                }
-                else{
-                    count +=1;
+                } else {
+                    count += 1;
                 }
             }
-            logger.info("COUNTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT = " + count);
-            layoutChange = (double)count/layout2.size();
+            layoutChange = (double) count / layout2.size();
             logger.info("Layout Change = " + layoutChange);
             connection.close();
 
@@ -531,7 +525,7 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
         return layoutChange;
     }
 
-    public double getEventrateChange(){
+    public double getEventrateChange() {
         Statement statement = null;
         Connection connection = dbConnector();
 
@@ -546,13 +540,13 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
         ResultSet resultSet1;
         ResultSet resultSet2;
         long currentTime = System.currentTimeMillis();
-        long previousTime1 = currentTime - 15*60*1000;
-        long previousTime2 = currentTime - 30*60*1000;
+        long previousTime1 = currentTime - 2 * 60 * 1000;
+        long previousTime2 = currentTime - 4 * 60 * 1000;
         double average1 = 0.0;
         double average2 = 0.0;
 
-        try{
-            String query = "select sum(avg) as average from (select avg(m2) as avg, parallel from metricstable where iijtimestamp between "+previousTime1+"  and "+currentTime+" group by parallel) as averagetable";
+        try {
+            String query = "select sum(avg) as average from (select avg(m2) as avg, parallel from metricstable where iijtimestamp between " + previousTime1 + "  and " + currentTime + " group by parallel) as averagetable";
             resultSet1 = statement.executeQuery(query);
             logger.info("Query datarate : " + query);
 
@@ -562,23 +556,26 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
                 }
             }
 
-            String query2 = "select sum(avg) as average from (select avg(m2) as avg, parallel from metricstable where iijtimestamp between "+previousTime2+"  and "+previousTime1+" group by parallel) as averagetable";
+            String query2 = "select sum(avg) as average from (select avg(m2) as avg, parallel from metricstable where iijtimestamp between " + previousTime2 + "  and " + previousTime1 + " group by parallel) as averagetable";
             resultSet2 = statement.executeQuery(query2);
             logger.info("Query datarate : " + query2);
 
             if (resultSet2.isBeforeFirst()) {
                 while (resultSet2.next()) {
-                    average2 = resultSet1.getDouble("average");
+                    average2 = resultSet2.getDouble("average");
                 }
             }
-        }catch (SQLException e){
-            logger.info(e);
+        } catch (SQLException e) {
+            logger.error(e);
+            e.printStackTrace();
+
         }
-        double eventRateChange = Math.abs(average1 - average2);
+        double eventRateChange = Math.abs((average1 - average2) / average1);
         return eventRateChange;
 
     }
-    public void switchingFunction(double currentSummeryThroughput, LinkedList<PartialSiddhiApp> partailSiddhiApps) throws SQLException{
+
+    public void switchingFunction(double currentSummeryThroughput, LinkedList<PartialSiddhiApp> partailSiddhiApps) throws SQLException {
         double previousSummaryThroughput = 0.0;
         double throughput = 0.0;
         int eventCount = 0;
@@ -591,17 +588,19 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
         ResultSet resultSet;
 
         double inertiaValue = getInertiaValue(currentSummeryThroughput, partailSiddhiApps);
-        double layoutChange = getLayoutChange();
+        logger.info("Inertia Value : " + inertiaValue);
+        double layoutChange = getLayoutChange(partailSiddhiApps);
+        logger.info("Layout Value : " + layoutChange);
         double eventRate = getEventrateChange();
-
-        double switchingFraction = (inertiaValue + layoutChange + eventRate)/3;
+        logger.info("Event Rate Value : " + eventRate);
+        double switchingFraction = (inertiaValue + layoutChange + eventCount) / 3;
         logger.info("Switching Fraction = " + switchingFraction);
 
-         if (switchingFraction < 0.5) {
+        if (switchingFraction < 0.6) {
             for (int i = 0; i < partailSiddhiApps.size(); i++) {
                 String[] SplitArray = partailSiddhiApps.get(i).getName().split("-");
                 int executionGroup = Integer.valueOf(SplitArray[SplitArray.length - 2].substring(5));
-
+                statement = connection.createStatement();
                 String query = "SELECT Throughput, Latency, Event_Count, process_CPU FROM previous_metrics_table where exec = " + executionGroup + "";
                 resultSet = statement.executeQuery(query);
                 logger.info("Query " + query);
@@ -625,7 +624,6 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
             newPartialSiddhiApps.clear();
         }
     }
-
 
 
 }

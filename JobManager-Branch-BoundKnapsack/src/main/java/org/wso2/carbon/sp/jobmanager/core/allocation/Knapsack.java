@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.sp.jobmanager.core.allocation;
 
 import org.wso2.carbon.sp.jobmanager.core.model.ResourceNode;
@@ -10,7 +28,7 @@ import java.util.LinkedList;
 public class Knapsack {
 
     private double capacity;
-    private double startcpuUsage;
+    private double startCPUUsage;
     private ResourceNode resourceNode;
     private LinkedList<PartialSiddhiApp> partialSiddhiApps;
 
@@ -23,7 +41,7 @@ public class Knapsack {
     public Knapsack(double capacity, ResourceNode resourceNode) {
         this.capacity = capacity;
         this.resourceNode = resourceNode;
-        this.startcpuUsage = capacity;
+        this.startCPUUsage = capacity;
         partialSiddhiApps = new LinkedList<>();
     }
 
@@ -33,14 +51,14 @@ public class Knapsack {
      * @param knapsack
      */
     public Knapsack(Knapsack knapsack) {
-        this.capacity = knapsack.getcapacity();
-        this.startcpuUsage = knapsack.getStartcpuUsage();
+        this.capacity = knapsack.getCapacity();
+        this.startCPUUsage = knapsack.getStartcpuUsage();
         this.resourceNode = knapsack.getresourceNode();
-        this.partialSiddhiApps = new LinkedList<>(knapsack.getpartialSiddhiApps());
+        this.partialSiddhiApps = new LinkedList<>(knapsack.getPartialSiddhiApps());
     }
 
     /**
-     * Adds an item doubleo the item-list and updates the capacity so it's up to date.
+     * Adds an item to the item-list and updates the capacity so it's up to date.
      *
      * @param item
      */
@@ -53,10 +71,10 @@ public class Knapsack {
     }
 
     /**
-     * Stes the capacity to the initial latency of the knapsack.
+     * Sets the capacity to the initial latency of the knapsack.
      */
-    public void resetcapacity() {
-        capacity = startcpuUsage;
+    public void resetCapacity() {
+        capacity = startCPUUsage;
     }
 
     /**
@@ -64,7 +82,7 @@ public class Knapsack {
      *
      * @param capacity
      */
-    public void setcapacity(double capacity) {
+    public void setCapacity(double capacity) {
         this.capacity = capacity;
     }
 
@@ -74,11 +92,11 @@ public class Knapsack {
      * @return
      */
     public double getStartcpuUsage() {
-        return startcpuUsage;
+        return startCPUUsage;
     }
 
-    public void setStartcpuUsage(double startcpuUsage) {
-        this.startcpuUsage = startcpuUsage;
+    public void setStartcpuUsage(double startCPUUsage) {
+        this.startCPUUsage = startCPUUsage;
     }
 
     /**
@@ -86,7 +104,7 @@ public class Knapsack {
      *
      * @return
      */
-    public double getcapacity() {
+    public double getCapacity() {
         return capacity;
     }
 
@@ -104,7 +122,7 @@ public class Knapsack {
      *
      * @return
      */
-    public LinkedList<PartialSiddhiApp> getpartialSiddhiApps() {
+    public LinkedList<PartialSiddhiApp> getPartialSiddhiApps() {
         return partialSiddhiApps;
     }
 }

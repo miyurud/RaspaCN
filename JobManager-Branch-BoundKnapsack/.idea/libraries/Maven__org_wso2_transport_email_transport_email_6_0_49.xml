@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.wso2.transport.email:transport-email:6.0.49">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/transport/email/transport-email/6.0.49/transport-email-6.0.49.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/transport/email/transport-email/6.0.49/transport-email-6.0.49-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/transport/email/transport-email/6.0.49/transport-email-6.0.49-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

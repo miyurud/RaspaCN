@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.sp.jobmanager.core.allocation;
 
 import org.apache.log4j.Logger;
@@ -40,17 +58,17 @@ public class MultipleKnapsack {
         LinkedList<MultipleKnapsack> knapsackNeighbors = new LinkedList<>();
 
         for (int gKnapsack = 0; gKnapsack < knapsacks.size(); gKnapsack++) {
-            for (int gItem = 0; gItem < knapsacks.get(gKnapsack).getpartialSiddhiApps().size(); gItem++) {
+            for (int gItem = 0; gItem < knapsacks.get(gKnapsack).getPartialSiddhiApps().size(); gItem++) {
                 for (int lKnapsack = 0; lKnapsack < knapsacks.size(); lKnapsack++) {
-                    for (int lItem = 0; lItem < knapsacks.get(lKnapsack).getpartialSiddhiApps().size(); lItem++) {
+                    for (int lItem = 0; lItem < knapsacks.get(lKnapsack).getPartialSiddhiApps().size(); lItem++) {
 
                         Knapsack globalKnapsack = knapsacks.get(gKnapsack);
                         Knapsack localKnapsack = knapsacks.get(lKnapsack);
 
                         if (!globalKnapsack.equals(localKnapsack)) {
-                            LinkedList<PartialSiddhiApp> globalpartialSiddhiApps = globalKnapsack.getpartialSiddhiApps();
-                            LinkedList<PartialSiddhiApp> localpartialSiddhiApps = localKnapsack.getpartialSiddhiApps();
-                            if (globalpartialSiddhiApps.get(gItem).getcpuUsage() <= localpartialSiddhiApps.get(lItem).getcpuUsage() + localKnapsack.getcapacity()) {
+                            LinkedList<PartialSiddhiApp> globalpartialSiddhiApps = globalKnapsack.getPartialSiddhiApps();
+                            LinkedList<PartialSiddhiApp> localpartialSiddhiApps = localKnapsack.getPartialSiddhiApps();
+                            if (globalpartialSiddhiApps.get(gItem).getcpuUsage() <= localpartialSiddhiApps.get(lItem).getcpuUsage() + localKnapsack.getCapacity()) {
 
                                 MultipleKnapsack neighbor = new MultipleKnapsack();
                                 LinkedList<Knapsack> currentKnapsack = new LinkedList<>();
@@ -58,13 +76,13 @@ public class MultipleKnapsack {
                                 for (Knapsack knapsack : knapsacks) {
                                     if (knapsack.equals(localKnapsack)) {
                                         Knapsack local = new Knapsack(knapsack);
-                                        local.setcapacity(localKnapsack.getcapacity() + localpartialSiddhiApps.get(lItem).getcpuUsage() - globalpartialSiddhiApps.get(gItem).getcpuUsage());
-                                        local.getpartialSiddhiApps().set(lItem, globalpartialSiddhiApps.get(gItem));
+                                        local.setCapacity(localKnapsack.getCapacity() + localpartialSiddhiApps.get(lItem).getcpuUsage() - globalpartialSiddhiApps.get(gItem).getcpuUsage());
+                                        local.getPartialSiddhiApps().set(lItem, globalpartialSiddhiApps.get(gItem));
                                         currentKnapsack.add(local);
                                     } else if (knapsack.equals(globalKnapsack)) {
                                         Knapsack global = new Knapsack(knapsack);
-                                        global.setcapacity(global.getcapacity() + global.getpartialSiddhiApps().get(gItem).getcpuUsage());
-                                        global.getpartialSiddhiApps().remove(gItem);
+                                        global.setCapacity(global.getCapacity() + global.getPartialSiddhiApps().get(gItem).getcpuUsage());
+                                        global.getPartialSiddhiApps().remove(gItem);
                                         currentKnapsack.add(global);
                                     } else {
                                         currentKnapsack.add(new Knapsack(knapsack));
@@ -94,7 +112,7 @@ public class MultipleKnapsack {
      * @return
      */
     public MultipleKnapsack neighborSearch(MultipleKnapsack knapsacks) {
-        LinkedList<MultipleKnapsack> neighbors = getNeighbors(knapsacks.getKnapsacks(), knapsacks.getpartialSiddhiApps());
+        LinkedList<MultipleKnapsack> neighbors = getNeighbors(knapsacks.getKnapsacks(), knapsacks.getPartialSiddhiApps());
         for (MultipleKnapsack neighbor : neighbors) {
             if (neighbor.getlatency() > knapsacks.getlatency()) {
                 knapsacks = neighborSearch(neighbor);
@@ -109,7 +127,7 @@ public class MultipleKnapsack {
     public void shufflepartialSiddhiAppsInKnapsacks() {
         LinkedList<PartialSiddhiApp> partialSiddhiAppsInKnapsacks = new LinkedList<>();
         for (Knapsack knapsack : knapsacks) {
-            partialSiddhiAppsInKnapsacks.addAll(knapsack.getpartialSiddhiApps());
+            partialSiddhiAppsInKnapsacks.addAll(knapsack.getPartialSiddhiApps());
         }
         Collections.sort(partialSiddhiAppsInKnapsacks, new Comparator<PartialSiddhiApp>() {
             @Override
@@ -124,11 +142,11 @@ public class MultipleKnapsack {
             }
         });
         for (Knapsack knapsack : knapsacks) {
-            knapsack.getpartialSiddhiApps().clear();
-            knapsack.resetcapacity();
+            knapsack.getPartialSiddhiApps().clear();
+            knapsack.resetCapacity();
             for (Iterator<PartialSiddhiApp> it = partialSiddhiAppsInKnapsacks.iterator(); it.hasNext(); ) {
                 PartialSiddhiApp item = it.next();
-                if (item.getcpuUsage() <= knapsack.getcapacity()) {
+                if (item.getcpuUsage() <= knapsack.getCapacity()) {
                     knapsack.addPartialSiddhiApps(item);
                     it.remove();
                 }
@@ -166,8 +184,8 @@ public class MultipleKnapsack {
             bestcpuUsageDifference = Integer.MAX_VALUE;
             bestKnapsack = null;
             for (int j = 0; j < knapsacks.size(); j++) {
-                if (knapsacks.get(j).getcapacity() >= partialSiddhiApps.get(i).getcpuUsage()) {
-                    currentcpuUsageDifference = knapsacks.get(j).getcapacity() - partialSiddhiApps.get(i).getcpuUsage();
+                if (knapsacks.get(j).getCapacity() >= partialSiddhiApps.get(i).getcpuUsage()) {
+                    currentcpuUsageDifference = knapsacks.get(j).getCapacity() - partialSiddhiApps.get(i).getcpuUsage();
                     if (currentcpuUsageDifference < bestcpuUsageDifference && currentcpuUsageDifference > 0) {
                         bestcpuUsageDifference = currentcpuUsageDifference;
                         bestKnapsack = knapsacks.get(j);
@@ -236,7 +254,7 @@ public class MultipleKnapsack {
                     weight += app.getcpuUsage();
                     currentThroughput += app.getThroughput();
                 }
-                if (weight > knapsack.getcapacity()) {
+                if (weight > knapsack.getCapacity()) {
                     toRemove.add(feasibleNode);
                 } else {
                     throughputValues.add(currentThroughput);
@@ -320,8 +338,8 @@ public class MultipleKnapsack {
                 branchAndBoundTreeNodes.add(index, new BranchAndBoundNode(upperBound, throughputValue, newPartialSiddhiApps));
                 tempTreeNodes.add(index, new BranchAndBoundNode(upperBound, throughputValue, newPartialSiddhiApps));
             }
-            if (level < getpartialSiddhiApps().size()) {
-                partialSiddhiApps.remove(getpartialSiddhiApps().get(level));
+            if (level < getPartialSiddhiApps().size()) {
+                partialSiddhiApps.remove(getPartialSiddhiApps().get(level));
             }
 
             level++;
@@ -371,7 +389,7 @@ public class MultipleKnapsack {
     public void calculatelatency() {
         double latency = 0;
         for (Knapsack knapsack : knapsacks) {
-            for (PartialSiddhiApp item : knapsack.getpartialSiddhiApps()) {
+            for (PartialSiddhiApp item : knapsack.getPartialSiddhiApps()) {
                 latency += item.getlatency();
             }
         }
@@ -387,14 +405,14 @@ public class MultipleKnapsack {
             ;
             log.info("\nResourceNode\n" + "resourceNode: " + knapsack.getresourceNode()
                     + "\nTotal Usable CPU : " + knapsack.getStartcpuUsage() +
-                    "\nUsed CPU in this iteration: " + (knapsack.getStartcpuUsage() - knapsack.getcapacity()) +
-                    "\nRemaining CPU : " + knapsack.getcapacity() + "\n");
+                    "\nUsed CPU in this iteration: " + (knapsack.getStartcpuUsage() - knapsack.getCapacity()) +
+                    "\nRemaining CPU : " + knapsack.getCapacity() + "\n");
 
-            knapsack.setStartcpuUsage(knapsack.getcapacity());
+            knapsack.setStartcpuUsage(knapsack.getCapacity());
 
             log.info("Initial CPU Usage of " + knapsack.getresourceNode() + " is set to " + knapsack.getStartcpuUsage() + "\n");
             try {
-                for (PartialSiddhiApp item : knapsack.getpartialSiddhiApps()) {
+                for (PartialSiddhiApp item : knapsack.getPartialSiddhiApps()) {
                     log.info("\n\nPartial siddhi app\n" + "Name: " + item.getName()
                             + "\nLatency : " + item.getlatency() + "\nCPU Usage : " + item.getcpuUsage());
                     partialSiddhiApps.remove(item);
@@ -416,7 +434,7 @@ public class MultipleKnapsack {
     public Map<ResourceNode, List<PartialSiddhiApp>> updatemap(Map<ResourceNode, List<PartialSiddhiApp>> map) {
         for (Knapsack knapsack : knapsacks) {
             List<PartialSiddhiApp> temp = new LinkedList<>();
-            for (PartialSiddhiApp item : knapsack.getpartialSiddhiApps()) {
+            for (PartialSiddhiApp item : knapsack.getPartialSiddhiApps()) {
                 temp.add(item);
             }
             if (map.containsKey(knapsack.getresourceNode())) {
@@ -482,7 +500,7 @@ public class MultipleKnapsack {
      *
      * @return
      */
-    public LinkedList<PartialSiddhiApp> getpartialSiddhiApps() {
+    public LinkedList<PartialSiddhiApp> getPartialSiddhiApps() {
         return partialSiddhiApps;
     }
 
@@ -528,14 +546,14 @@ public class MultipleKnapsack {
         });
 
         for (PartialSiddhiApp app : partialSiddhiApps) {
-            if (knapsack.getcapacity() > maxCPUUsage && knapsack.getcapacity() > app.getcpuUsage()) {
+            if (knapsack.getCapacity() > maxCPUUsage && knapsack.getCapacity() > app.getcpuUsage()) {
 
                 maxCPUUsage += app.getcpuUsage();
                 upperBound += app.getThroughput();
                 lastThroughputValue = app.getThroughput();
                 lastCPUUsage = app.getcpuUsage();
             } else {
-                if (knapsack.getcapacity() < maxCPUUsage) {
+                if (knapsack.getCapacity() < maxCPUUsage) {
                     upperBound -= lastThroughputValue;
                     maxCPUUsage -= lastCPUUsage;
                     lastThroughputValue = 0.0;
@@ -545,7 +563,7 @@ public class MultipleKnapsack {
                 remainingCPUUsage += app.getcpuUsage();
             }
             if (remainingCPUUsage != 0) {
-                throughputValue = upperBound + (remainingThroughput / remainingCPUUsage) * (knapsack.getcapacity() - maxCPUUsage);
+                throughputValue = upperBound + (remainingThroughput / remainingCPUUsage) * (knapsack.getCapacity() - maxCPUUsage);
             } else {
                 throughputValue = upperBound;
             }
@@ -578,13 +596,13 @@ public class MultipleKnapsack {
         });
         for (PartialSiddhiApp app : updatedPartialSiddhiApps) {
 
-            if (knapsack.getcapacity() > maxCPUUsage && knapsack.getcapacity() > app.getcpuUsage()) {
+            if (knapsack.getCapacity() > maxCPUUsage && knapsack.getCapacity() > app.getcpuUsage()) {
 
                 maxCPUUsage += app.getcpuUsage();
                 upperBound += app.getThroughput();
                 lastThroughputValue = app.getThroughput();
             } else {
-                if (knapsack.getcapacity() < maxCPUUsage) {
+                if (knapsack.getCapacity() < maxCPUUsage) {
                     upperBound -= lastThroughputValue;
                 }
                 break;

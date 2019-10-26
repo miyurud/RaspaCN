@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.wso2.extension.siddhi.map.json:siddhi-map-json:4.0.23">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/extension/siddhi/map/json/siddhi-map-json/4.0.23/siddhi-map-json-4.0.23.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/extension/siddhi/map/json/siddhi-map-json/4.0.23/siddhi-map-json-4.0.23-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/extension/siddhi/map/json/siddhi-map-json/4.0.23/siddhi-map-json-4.0.23-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

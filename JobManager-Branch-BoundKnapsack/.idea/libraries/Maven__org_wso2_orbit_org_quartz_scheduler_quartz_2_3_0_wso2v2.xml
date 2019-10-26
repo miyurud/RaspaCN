@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.wso2.orbit.org.quartz-scheduler:quartz:2.3.0.wso2v2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/orbit/org/quartz-scheduler/quartz/2.3.0.wso2v2/quartz-2.3.0.wso2v2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/orbit/org/quartz-scheduler/quartz/2.3.0.wso2v2/quartz-2.3.0.wso2v2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/wso2/orbit/org/quartz-scheduler/quartz/2.3.0.wso2v2/quartz-2.3.0.wso2v2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
