@@ -177,7 +177,6 @@ public class MetricsBasedAllocationAlgorithm implements ResourceAllocationAlgori
                             ", Throughput :" + throughput +
                             " and processCPU : " + processCPU + "\n");
                 }
-                //resultSet.close();
             }
             if ((metricCounter + 2) > appsToDeploy.size()) {
                 logger.error("Metrics are not available for required number of Partial siddhi apps");
