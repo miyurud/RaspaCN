@@ -9,7 +9,6 @@ Knapsack capacity that we defined.
 
 The algorithm consists of core parts for finding the subset out of n partial Siddhi applications with maximum throughput performance. After selecting the subset, the remaining partial Siddhi applications are scheduled in such a way to reduce the inter-node communication cost among the workers. The steps of this algorithm include the calculating the upper bound, calculating the profit value, finding all possible solutions and selecting the optimum solution.
 
-
 ### Build Command
 ```
 mvn clean install -Dcheckstyle.skip=true -Dfindbugs.skip=true
